@@ -1,9 +1,17 @@
 package com.afrivera.security.persistence.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "permission")
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class PermissionEntity {
 
     @Id
@@ -13,27 +21,4 @@ public class PermissionEntity {
     @Column(unique = true, nullable = false, updatable = false)
     private String name;
 
-    public PermissionEntity() {
-    }
-
-    public PermissionEntity(Integer id, String name) {
-        this.id = id;
-        this.name = name;
-    }
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
 }

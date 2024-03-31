@@ -1,12 +1,20 @@
 package com.afrivera.security.persistence.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.HashSet;
 import java.util.Set;
 
 @Entity
 @Table(name = "role")
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class RoleEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,36 +28,4 @@ public class RoleEntity {
     @JoinTable(name = "role_permission", joinColumns = @JoinColumn(name = "role_id"), inverseJoinColumns = @JoinColumn(name = "permission_id"))
     private Set<PermissionEntity> permissions = new HashSet<>();
 
-    public RoleEntity() {
-    }
-
-    public RoleEntity(Integer id, RoleEnum roleEnum, Set<PermissionEntity> permissions) {
-        this.id = id;
-        this.roleEnum = roleEnum;
-        this.permissions = permissions;
-    }
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public RoleEnum getRoleEnum() {
-        return roleEnum;
-    }
-
-    public void setRoleEnum(RoleEnum roleEnum) {
-        this.roleEnum = roleEnum;
-    }
-
-    public Set<PermissionEntity> getPermissions() {
-        return permissions;
-    }
-
-    public void setPermissions(Set<PermissionEntity> permissions) {
-        this.permissions = permissions;
-    }
 }
