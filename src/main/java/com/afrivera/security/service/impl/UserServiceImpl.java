@@ -2,6 +2,7 @@ package com.afrivera.security.service.impl;
 
 import com.afrivera.security.controller.dto.AuthLogin;
 import com.afrivera.security.controller.dto.AuthResponse;
+import com.afrivera.security.controller.dto.RegisterUser;
 import com.afrivera.security.persistence.entity.UserEntity;
 import com.afrivera.security.persistence.repository.UserRepository;
 import com.afrivera.security.service.IUserService;
@@ -59,6 +60,11 @@ public class UserServiceImpl implements IUserService, UserDetailsService {
         String accessToken = jwtUtils.generateToken(authentication);
 
         return new AuthResponse(authLogin.getUsername(), "User Logged!", accessToken, true);
+    }
+
+    @Override
+    public AuthResponse register(RegisterUser registerUser) {
+        return null;
     }
 
     public Authentication authentication(String username, String password){

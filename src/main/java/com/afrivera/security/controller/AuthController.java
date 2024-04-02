@@ -2,6 +2,7 @@ package com.afrivera.security.controller;
 
 import com.afrivera.security.controller.dto.AuthLogin;
 import com.afrivera.security.controller.dto.AuthResponse;
+import com.afrivera.security.controller.dto.RegisterUser;
 import com.afrivera.security.service.IUserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,5 +24,10 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@RequestBody @Valid AuthLogin authLogin){
         return new ResponseEntity<AuthResponse>(userService.login(authLogin), HttpStatus.OK);
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<AuthResponse> register(@RequestBody @Valid RegisterUser registerUser){
+        return new ResponseEntity<AuthResponse>(userService.register(registerUser), HttpStatus.CREATED);
     }
 }
