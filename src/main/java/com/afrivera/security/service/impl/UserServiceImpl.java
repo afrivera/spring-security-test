@@ -3,7 +3,9 @@ package com.afrivera.security.service.impl;
 import com.afrivera.security.controller.dto.AuthLogin;
 import com.afrivera.security.controller.dto.AuthResponse;
 import com.afrivera.security.controller.dto.RegisterUser;
+import com.afrivera.security.persistence.entity.RoleEntity;
 import com.afrivera.security.persistence.entity.UserEntity;
+import com.afrivera.security.persistence.repository.RoleRepository;
 import com.afrivera.security.persistence.repository.UserRepository;
 import com.afrivera.security.service.IUserService;
 import com.afrivera.security.util.JwtUtils;
@@ -22,12 +24,15 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements IUserService, UserDetailsService {
 
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtils jwtUtils;
 
@@ -64,6 +69,14 @@ public class UserServiceImpl implements IUserService, UserDetailsService {
 
     @Override
     public AuthResponse register(RegisterUser registerUser) {
+
+        Set<RoleEntity> roleEntities = roleRepository.findRoleEntitiesByRoleEnumIn(registerUser.getRoles().getRoles())
+                .stream().collect(Collectors.toSet());
+        if(roleEntities.isEmpty()){
+            throw new IllegalArgumentException("the roles especified doesn't exist");
+        }
+
+
         return null;
     }
 
