@@ -9,6 +9,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.List;
 import java.util.Set;
@@ -21,7 +22,7 @@ public class SecurityApplication {
 	}
 
 	@Bean
-	CommandLineRunner init(UserServiceImpl userService){
+	CommandLineRunner init(UserServiceImpl userService, PasswordEncoder passwordEncoder){
 		return args -> {
 			/* Create PERMISSIONS */
 			PermissionEntity createPermission = PermissionEntity.builder()
@@ -67,7 +68,7 @@ public class SecurityApplication {
 			/* CREATE USERS */
 			UserEntity userSantiago = UserEntity.builder()
 					.username("santiago")
-					.password("$2a$10$cMY29RPYoIHMJSuwRfoD3eQxU1J5Rww4VnNOUOAEPqCBshkNfrEf6")
+					.password(passwordEncoder.encode("1234"))
 					.isEnabled(true)
 					.accountNoExpired(true)
 					.accountNoLocked(true)
