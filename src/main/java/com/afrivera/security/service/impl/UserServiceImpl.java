@@ -14,6 +14,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -39,22 +40,22 @@ public class UserServiceImpl implements IUserService, UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         UserEntity userEntity = userRepository.findUserEntityByUsername(username)
-                .orElseThrow(()-> new UsernameNotFoundException("username: "+ username + " doesn't exist!"));
+                .orElseThrow(() -> new UsernameNotFoundException("username: " + username + " doesn't exist!"));
         List<SimpleGrantedAuthority> authorities = new ArrayList<>();
 
         userEntity.getRoles()
                 .forEach(role -> authorities.add(new SimpleGrantedAuthority("ROLE_" + role.getRoleEnum().name())));
 
         userEntity.getRoles().stream()
-                .flatMap(role-> role.getPermissions()
+                .flatMap(role -> role.getPermissions()
                         .stream())
                 .forEach(permission -> authorities.add(new SimpleGrantedAuthority(permission.getName())));
 
-        return new User(username, userEntity.getPassword(), userEntity.isEnabled(), userEntity.isAccountNoExpired(), userEntity.isCredentialsNoExpired(),userEntity.isAccountNoLocked(), authorities);
+        return new User(username, userEntity.getPassword(), userEntity.isEnabled(), userEntity.isAccountNoExpired(), userEntity.isCredentialsNoExpired(), userEntity.isAccountNoLocked(), authorities);
     }
 
     @Override
-    public void saveInitUsers(List<UserEntity> users){
+    public void saveInitUsers(List<UserEntity> users) {
         userRepository.saveAll(users);
     }
 
@@ -72,20 +73,36 @@ public class UserServiceImpl implements IUserService, UserDetailsService {
 
         Set<RoleEntity> roleEntities = roleRepository.findRoleEntitiesByRoleEnumIn(registerUser.getRoles().getRoles())
                 .stream().collect(Collectors.toSet());
-        if(roleEntities.isEmpty()){
-            throw new IllegalArgumentException("the roles especified doesn't exist");
+        if (roleEntities.isEmpty()) {
+            throw new IllegalArgumentException("the roles specified doesn't exist");
         }
+        UserEntity userEntity = UserEntity.
+                builder()
+                .username(registerUser.getUsername())
+                .password(passwordEncoder.encode(registerUser.getPassword()))
+                .roles(roleEntities)
+                .isEnabled(true)
+                .accountNoLocked(true)
+                .accountNoExpired(true)
+                .credentialsNoExpired(true)
+                .build();
+        UserEntity userSave = userRepository.save(userEntity);
+        List<SimpleGrantedAuthority> authorities = new ArrayList<>();
+        userSave.getRoles().forEach(role -> authorities.add(new SimpleGrantedAuthority("ROLE_" + role.getRoleEnum().name())));
+        userSave.getRoles().stream().flatMap(role -> role.getPermissions().stream()).forEach(permission -> authorities.add(new SimpleGrantedAuthority(permission.getName())));
+        SecurityContext securityContext = SecurityContextHolder.getContext();
+        Authentication authentication = new UsernamePasswordAuthenticationToken(userSave.getUsername(), null, authorities);
+        String accessToken = jwtUtils.generateToken(authentication);
 
-
-        return null;
+        return new AuthResponse(userSave.getUsername(), "user created successfully", accessToken, true);
     }
 
-    public Authentication authentication(String username, String password){
+    public Authentication authentication(String username, String password) {
         UserDetails userDetails = loadUserByUsername(username);
-        if(userDetails == null){
+        if (userDetails == null) {
             throw new BadCredentialsException("invalid username or password");
         }
-        if(!passwordEncoder.matches(password, userDetails.getPassword())){
+        if (!passwordEncoder.matches(password, userDetails.getPassword())) {
             throw new BadCredentialsException("invalid username or password");
         }
         return new UsernamePasswordAuthenticationToken(username, password, userDetails.getAuthorities());

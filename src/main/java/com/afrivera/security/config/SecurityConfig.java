@@ -1,6 +1,9 @@
 package com.afrivera.security.config;
 
+import com.afrivera.security.config.filter.JwtTokenValidator;
 import com.afrivera.security.service.impl.UserServiceImpl;
+import com.afrivera.security.util.JwtUtils;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -22,6 +25,7 @@ import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +33,10 @@ import java.util.List;
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
+
+    private final JwtUtils jwtUtils;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
@@ -42,9 +49,11 @@ public class SecurityConfig {
 
                     // endpoint privado
                     http.requestMatchers(HttpMethod.GET, "/access/v1/test-secured").hasAuthority("CREATE");
+                    http.requestMatchers(HttpMethod.GET, "/access/v1/test").hasAuthority("READ");
                     // configurar el resto de endpoints no configurados
                     http.anyRequest().denyAll();
                 })
+                .addFilterBefore(new JwtTokenValidator(jwtUtils), BasicAuthenticationFilter.class)
                 .build();
     }
 
